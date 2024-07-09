@@ -1,90 +1,109 @@
 package com.pingou.mspromotionalbanner.mssubscription.service;
 
+import com.pingou.mspromotionalbanner.mssubscription.model.PlanFlag;
 import com.pingou.mspromotionalbanner.mssubscription.model.Subscription;
-
-import com.pingou.mspromotionalbanner.mssubscription.model.dto.SubscriptionDTO;
 import com.pingou.mspromotionalbanner.mssubscription.repository.SubscriptionRepository;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
-
+import java.util.Optional;
 @Service
 public class SubscriptionService {
 
     private final SubscriptionRepository subscriptionRepository;
 
-    @Autowired
     public SubscriptionService(SubscriptionRepository subscriptionRepository) {
         this.subscriptionRepository = subscriptionRepository;
-    }
-
-    public Subscription createSubscription(SubscriptionDTO subscriptionDTO) {
-        Subscription subscription = new Subscription();
-        subscription.setSubscriptionName(subscriptionDTO.getSubscriptionName());
-        subscription.setDescription(subscriptionDTO.getDescription());
-        subscription.setPrice(subscriptionDTO.getPrice());
-
-
-        return subscriptionRepository.save(subscription);
-    }
-
-    public void deleteSubscription(Long id) {
-        if (subscriptionRepository.existsById(id)) {
-            subscriptionRepository.deleteById(id);
-        } else {
-            throw new RuntimeException("Subscription not found for this id : " + id);
-        }
-    }
-
-    public Subscription updateSubscription(Long id, SubscriptionDTO subscriptionDTO) {
-        Subscription subscription = subscriptionRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Subscription not found for this id : " + id));
-
-        subscription.setSubscriptionName(subscriptionDTO.getSubscriptionName());
-        subscription.setDescription(subscriptionDTO.getDescription());
-        subscription.setPrice(subscriptionDTO.getPrice());
-
-        return subscriptionRepository.save(subscription);
-    }
-
-    public Subscription getSubscription(Long id) {
-        return subscriptionRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Subscription not found for this id : " + id));
     }
 
     public List<Subscription> getAllSubscriptions() {
         return subscriptionRepository.findAll();
     }
 
-    public Subscription subscribeToSubscription(Long subscriptionId, Long userId) {
-        Subscription subscription = subscriptionRepository.findById(subscriptionId)
-                .orElseThrow(() -> new RuntimeException("Subscription not found for this id : " + subscriptionId));
+    public Optional<Subscription> getSubscriptionById(String id) {
+        return subscriptionRepository.findById(id);
+    }
 
-        if (!subscription.getUserIds().contains(userId)) {
-            subscription.getUserIds().add(userId);
-            return subscriptionRepository.save(subscription);
+    public Subscription createSubscription(Subscription subscription) {
+        subscription.setCreatedAt(new Date());
+        return subscriptionRepository.save(subscription);
+    }
+
+    public Subscription updateSubscription(String id, Subscription subscriptionDetails) {
+        return subscriptionRepository.findById(id)
+                .map(subscription -> {
+                    updateSubscriptionDetails(subscription, subscriptionDetails);
+                    return subscriptionRepository.save(subscription);
+                })
+                .orElseThrow(() -> new RuntimeException("Subscription not found with id " + id));
+    }
+
+    private void updateSubscriptionDetails(Subscription subscription, Subscription subscriptionDetails) {
+        subscription.setTitle(subscriptionDetails.getTitle());
+        subscription.setMonthlyPrice(subscriptionDetails.getMonthlyPrice());
+        subscription.setSemiAnnualPrice(subscriptionDetails.getSemiAnnualPrice());
+        subscription.setFeatures(subscriptionDetails.getFeatures());
+        setPlanFlag(subscription, subscriptionDetails.getMonthlyPrice());
+        subscription.setIdCachacas(subscriptionDetails.getIdCachacas());
+    }
+
+    private void setPlanFlag(Subscription subscription, double monthlyPrice) {
+        if (monthlyPrice < 30) {
+            subscription.setFlag(PlanFlag.cheapest);
+        } else if (monthlyPrice < 45) {
+            subscription.setFlag(PlanFlag.recommended);
         } else {
-            throw new RuntimeException("User already subscribed to this subscription");
+            subscription.setFlag(PlanFlag.premium);
         }
     }
 
-//    public Long findSubscriptionIdByUserId(Long userId) {
-//        for (Subscription subscription : subscriptionRepository.findAll()) {
-//            if (subscription.getUserIds().contains(userId)) {
-//                return subscription.getId();
-//            }
-//        }
-//        throw new RuntimeException("Subscription not found for this user id : " + userId);
-//    }
-
-    public List<Subscription> getSubscriptionsByUserId(Long userId) {
-        System.out.println(userId);
-        return subscriptionRepository.findAll().stream()
-                .filter(subscription -> subscription.getUserIds().contains(userId))
-                .collect(Collectors.toList());
+    public void deleteSubscription(String id) {
+        subscriptionRepository.deleteById(id);
     }
 
+    public List<String> ultimasCachacas(String subscriptionId) {
+        Optional<Subscription> subscriptionOptional = subscriptionRepository.findById(subscriptionId);
+        if (subscriptionOptional.isPresent()) {
+            Subscription subscription = subscriptionOptional.get();
+            List<String> idCachacas = subscription.getIdCachacas();
+            int size = idCachacas.size();
+            return size >= 2 ? idCachacas.subList(size - 2, size) : idCachacas;
+        } else {
+            throw new RuntimeException("Subscription not found with id " + subscriptionId);
+        }
+    }
+
+    public Subscription adicionarCachacas(String subscriptionId, String novaCachaca1, String novaCachaca2) {
+        Optional<Subscription> subscriptionOptional = subscriptionRepository.findById(subscriptionId);
+        if (subscriptionOptional.isPresent()) {
+            Subscription subscription = subscriptionOptional.get();
+            List<String> idCachacas = subscription.getIdCachacas();
+            idCachacas.add(novaCachaca1);
+            idCachacas.add(novaCachaca2);
+            subscription.setIdCachacas(idCachacas);
+            return subscriptionRepository.save(subscription);
+        } else {
+            throw new RuntimeException("Subscription not found with id " + subscriptionId);
+        }
+    }
+
+    public void createSubscriptionByUser(String userId, String subscriptionId){
+        Subscription subscription = subscriptionRepository.findById(subscriptionId).get();
+        List<String> usersId = subscription.getUsersId();
+        usersId.add(userId);
+        subscription.setUsersId(usersId);
+        subscriptionRepository.save(subscription);
+    }
+
+    public Subscription getByIdUser(String userId){
+        List<Subscription> subscriptions = subscriptionRepository.findAll();
+        for(Subscription subscription : subscriptions){
+            List<String> usersId = subscription.getUsersId();
+            if(usersId.contains(userId)){
+                return subscription;
+            }
+        }
+        return null;
+    }
 }

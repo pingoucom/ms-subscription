@@ -1,78 +1,78 @@
 package com.pingou.mspromotionalbanner.mssubscription.controller;
 
 import com.pingou.mspromotionalbanner.mssubscription.model.Subscription;
-import com.pingou.mspromotionalbanner.mssubscription.model.dto.SubscriptionDTO;
 import com.pingou.mspromotionalbanner.mssubscription.service.SubscriptionService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
-@Controller
-@RequestMapping("/subscription")
+@RestController
+@RequestMapping("/subscriptions")
 public class SubscriptionController {
-    private final SubscriptionService subscriptionService;
 
-    @Autowired
-    public SubscriptionController(SubscriptionService subscriptionService) {
-        this.subscriptionService = subscriptionService;
-    }
+private final SubscriptionService subscriptionService;
 
-    @PostMapping
-    public ResponseEntity<Subscription> createSubscription(@RequestBody SubscriptionDTO subscriptionDTO) {
-        try {
-            return ResponseEntity.ok(subscriptionService.createSubscription(subscriptionDTO));
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
-        }
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteSubscription(@PathVariable Long id) {
-        subscriptionService.deleteSubscription(id);
-        return ResponseEntity.ok().build();
-    }
-
-    @PatchMapping("/{id}")
-    public ResponseEntity<Subscription> updateSubscription(@PathVariable Long id, @RequestBody SubscriptionDTO subscriptionDTO) {
-        try{
-            Subscription updatedSubscription = subscriptionService.updateSubscription(id, subscriptionDTO);
-            return ResponseEntity.ok(updatedSubscription);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<Subscription> getSubscription(@PathVariable Long id) {
-        try{
-            Subscription subscription = subscriptionService.getSubscription(id);
-            return ResponseEntity.ok(subscription);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    @GetMapping
-    public ResponseEntity<List<Subscription>> getAllSubscriptions() {
-        return ResponseEntity.ok(subscriptionService.getAllSubscriptions());
-    }
-
-    @PostMapping("/{subscriptionId}/{userId}")
-    public ResponseEntity<Subscription> subscribeToSubscription(@PathVariable Long subscriptionId, @PathVariable Long userId) {
-        try {
-            return ResponseEntity.ok(subscriptionService.subscribeToSubscription(subscriptionId, userId));
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
-        }
-    }
-
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Subscription>> getSubscriptionsByUserId(@PathVariable Long userId) {
-        return ResponseEntity.ok(subscriptionService.getSubscriptionsByUserId(userId));
-    }
+public SubscriptionController(SubscriptionService subscriptionService) {
+    this.subscriptionService = subscriptionService;
 }
 
+@GetMapping
+public ResponseEntity<List<Subscription>> getAllSubscriptions() {
+    List<Subscription> subscriptions = subscriptionService.getAllSubscriptions();
+    return ResponseEntity.ok(subscriptions);
+}
 
+@GetMapping("/{id}")
+public ResponseEntity<Subscription> getSubscriptionById(@PathVariable String id) {
+    Optional<Subscription> subscription = subscriptionService.getSubscriptionById(id);
+    return subscription.map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
+}
+
+@PostMapping
+public ResponseEntity<Subscription> createSubscription(@RequestBody Subscription subscription) {
+    Subscription createdSubscription = subscriptionService.createSubscription(subscription);
+    return new ResponseEntity<>(createdSubscription, HttpStatus.CREATED);
+}
+
+@PutMapping("/{id}")
+public ResponseEntity<Subscription> updateSubscription(@PathVariable String id, @RequestBody Subscription subscription) {
+    Subscription updatedSubscription = subscriptionService.updateSubscription(id, subscription);
+    return ResponseEntity.ok(updatedSubscription);
+}
+
+@DeleteMapping("/{id}")
+public ResponseEntity<Void> deleteSubscription(@PathVariable String id) {
+    subscriptionService.deleteSubscription(id);
+    return ResponseEntity.noContent().build();
+}
+
+@GetMapping("/{subscriptionId}/ultimas-cachacas")
+public ResponseEntity<List<String>> ultimasCachacas(@PathVariable String subscriptionId) {
+    List<String> ultimasCachacas = subscriptionService.ultimasCachacas(subscriptionId);
+    return ResponseEntity.ok(ultimasCachacas);
+}
+
+@PostMapping("/{subscriptionId}/adicionar-cachacas")
+public ResponseEntity<Subscription> adicionarCachacas(@PathVariable String subscriptionId,
+                                                      @RequestParam String novaCachaca1,
+                                                      @RequestParam String novaCachaca2) {
+    Subscription updatedSubscription = subscriptionService.adicionarCachacas(subscriptionId, novaCachaca1, novaCachaca2);
+    return ResponseEntity.ok(updatedSubscription);
+}
+
+@GetMapping("/subsByUser/{userId}")
+public ResponseEntity<Subscription> getByIdUser(@PathVariable String userId) {
+    Subscription subscriptions = subscriptionService.getByIdUser(userId);
+    return ResponseEntity.ok(subscriptions);
+}
+
+@PostMapping("/subsByUser/{userId}/{subsId}")
+public void createSubscriptionByUser(@PathVariable String userId, @PathVariable String subsId) {
+    subscriptionService.createSubscriptionByUser(userId, subsId);
+}
+}

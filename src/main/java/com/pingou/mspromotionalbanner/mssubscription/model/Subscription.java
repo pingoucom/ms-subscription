@@ -3,7 +3,7 @@ package com.pingou.mspromotionalbanner.mssubscription.model;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 
 @Data
@@ -12,23 +12,23 @@ import java.util.List;
 public class Subscription {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    private String id;
 
-    @Column(name = "subscription_name")
-    private String subscriptionName;
+    private String title;
+    private double monthlyPrice;
+    private double semiAnnualPrice;
 
-    @Column
-    private String description;
-
-    @Column
-    private BigDecimal price;
-
-//    @Column
-//    @OneToMany(mappedBy = "subscription")
-//    private List<User> user;
-
-    @Column(name = "user_ids")
     @ElementCollection
-    @CollectionTable(name = "subscription_ids", joinColumns = @JoinColumn(name = "subscription_id"))
-    private List<Long> userIds;
+    private List<String> features;
+
+    @Enumerated(EnumType.STRING)
+    private PlanFlag flag;
+
+    private Date createdAt;
+
+    @ElementCollection
+    private List<String> idCachacas;
+
+    @ElementCollection
+    private List<String> usersId;
 }
