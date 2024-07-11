@@ -1,0 +1,50 @@
+version: '3'
+services:
+  ms-subscription:
+    container_name: ms-subscription
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/ms-subscription?allowPublicKeyRetrieval=true&useSSL=false
+      SPRING_DATASOURCE_USERNAME: ms-subscription
+      SPRING_DATASOURCE_PASSWORD: password
+      KONG_BASE_URI: http://kong:8001
+    ports:
+      - '8085:8080'
+    networks:
+      - api-gateway_microservices
+      - mysql_microservices
+
+  mysql:
+    image: 'mysql/mysql-server:8.0'
+    ports:
+      - '3306:3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: 'root'
+      MYSQL_ROOT_HOST: "%"
+      MYSQL_DATABASE: 'ms-subscription'
+      MYSQL_USER: 'ms-subscription'
+      MYSQL_PASSWORD: 'password'
+      MYSQL_ALLOW_EMPTY_PASSWORD: 1
+    networks:
+      - mysql_microservices
+    volumes:
+      - 'mysql:/var/lib/mysql'
+      - './docker/database/create-testing-database.sh:/docker-entrypoint-initdb.d/10-create-testing-database.sh'
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-p password" ]
+      retries: 3
+      timeout: 5s
+
+networks:
+  api-gateway_microservices:
+    driver: bridge
+    external: true
+  mysql_microservices:
+    driver: bridge
+    external: true
+
+volumes:
+  mysql:
+    driver: local

@@ -1,4 +1,4 @@
-package com.pingou.mspromotionalbanner.mssubscription.model;
+package com.pingou.mssubscription.model;
 
 public enum PlanFlag {
     recommended,

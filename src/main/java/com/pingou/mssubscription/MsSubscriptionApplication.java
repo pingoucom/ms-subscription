@@ -1,4 +1,4 @@
-package com.pingou.mspromotionalbanner.mssubscription;
+package com.pingou.mssubscription;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

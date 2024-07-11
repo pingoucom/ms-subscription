@@ -1,4 +1,4 @@
-package com.pingou.mspromotionalbanner.mssubscription.model;
+package com.pingou.mssubscription.model;
 
 import jakarta.persistence.*;
 import lombok.Data;

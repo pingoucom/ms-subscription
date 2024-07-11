@@ -1,8 +1,8 @@
-package com.pingou.mspromotionalbanner.mssubscription.service;
+package com.pingou.mssubscription.service;
 
-import com.pingou.mspromotionalbanner.mssubscription.model.PlanFlag;
-import com.pingou.mspromotionalbanner.mssubscription.model.Subscription;
-import com.pingou.mspromotionalbanner.mssubscription.repository.SubscriptionRepository;
+import com.pingou.mssubscription.model.PlanFlag;
+import com.pingou.mssubscription.model.Subscription;
+import com.pingou.mssubscription.repository.SubscriptionRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;

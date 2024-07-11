@@ -1,8 +1,7 @@
-package com.pingou.mspromotionalbanner.mssubscription.controller;
+package com.pingou.mssubscription.controller;
 
-import com.pingou.mspromotionalbanner.mssubscription.model.Subscription;
-import com.pingou.mspromotionalbanner.mssubscription.service.SubscriptionService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.pingou.mssubscription.model.Subscription;
+import com.pingou.mssubscription.service.SubscriptionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

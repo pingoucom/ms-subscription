@@ -1,4 +1,4 @@
-package com.pingou.mspromotionalbanner.mssubscription;
+package com.pingou.mssubscription;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

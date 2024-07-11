@@ -1,12 +1,8 @@
-package com.pingou.mspromotionalbanner.mssubscription.model.dto;
+package com.pingou.mssubscription.model.dto;
 
-import com.pingou.mspromotionalbanner.mssubscription.model.PlanFlag;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import com.pingou.mssubscription.model.PlanFlag;
 import lombok.Data;
 
-import java.util.Date;
 import java.util.List;
 
 @Data
